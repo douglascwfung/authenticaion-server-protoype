@@ -1,8 +1,9 @@
 package net.icestone.authserver.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +14,9 @@ import net.icestone.authserver.service.UserService;
 
 @EnableWebSecurity(debug = true)
 public class WebSecurityConfig {
+	
+	@Autowired
+	private CustomPwdAuthenticationProvider customPwdAuthenticationProvider;
 	
 	private final UserService userService;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -25,16 +29,18 @@ public class WebSecurityConfig {
 	@Bean
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 		
-		AuthenticationManagerBuilder authenticationManagerBuilder =
-				http.getSharedObject(AuthenticationManagerBuilder.class);
-		
-		authenticationManagerBuilder.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder);
+//		AuthenticationManagerBuilder authenticationManagerBuilder =
+//				http.getSharedObject(AuthenticationManagerBuilder.class);
+//		
+//		authenticationManagerBuilder.userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder);
 
-		http.authorizeHttpRequests( (auth)->auth
+		http
+		.authenticationProvider(customPwdAuthenticationProvider)		
+		.authorizeHttpRequests( (auth)->auth				
 				.antMatchers("/api/test/auth").authenticated()
 				.antMatchers("/api/test/admin").hasRole("ADMIN")
-//				.antMatchers("/api/test/user").hasRole("USER")
-				.antMatchers("/api/test/user").hasAuthority(EAuthority.DELETE.toString())
+				.antMatchers("/api/test/user").hasRole("USER")
+//				.antMatchers("/api/test/user").hasAuthority(EAuthority.DELETE.toString())
 				//.antMatchers("/api/test/mod").hasRole("MODERATOR")
 				.antMatchers("/api/test/all").permitAll()
 		).httpBasic(Customizer.withDefaults());
