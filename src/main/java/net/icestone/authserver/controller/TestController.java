@@ -1,13 +1,18 @@
 package net.icestone.authserver.controller;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
+	
+	@PostMapping("/post")
+	public String postAccess() {
+		return "postContent.";
+	}
 
 	@GetMapping("/auth")
 	public String authAccess() {
